@@ -1,51 +1,89 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <title>LIFF自動發訊息</title>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINE LIFF 自動發送訊息</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        #message {
+            margin: 20px 0;
+            font-size: 18px;
+        }
+        .btn {
+            background-color: #06C755;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <h1>正在處理中...</h1>
+    <div id="message">正在連接到LINE...</div>
+    <button id="sendMessageBtn" class="btn" style="display: none;">手動發送訊息</button>
 
-  <script>
-    async function main() {
-        await liff.init({ liffId: "2007338941-D63gmVoP" });
-
-        // ⭐ 如果還沒登入，就登入，並且強制要求 scope
-        if (!liff.isLoggedIn()) {
-            liff.login({
-            scope: ['profile', 'chat_message.write'],   // 💬 特別注意：這裡一定要帶
-            redirectUri: window.location.href           // ⭐ 讓它回來這一頁，繼續動作
+    <!-- 引入LIFF SDK -->
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 初始化LIFF
+            // 請將YOUR_LIFF_ID替換為您的LIFF ID
+            liff.init({
+                liffId: "2007338941-D63gmVoP"
+            }).then(() => {
+                // 檢查是否在LINE環境內
+                if (liff.isLoggedIn()) {
+                    document.getElementById('message').textContent = '已連接到LINE，正在發送訊息...';
+                    // 自動發送訊息
+                    sendMessage();
+                } else {
+                    document.getElementById('message').textContent = '請先登入LINE';
+                    liff.login();
+                }
+            }).catch(err => {
+                document.getElementById('message').textContent = '發生錯誤: ' + err.message;
+                console.error('LIFF初始化失敗', err);
             });
-            return;  // login 之後頁面會重新整理，所以這裡 return
-        }
 
-        try {
-            await liff.sendMessages([
-            {
-                type: "text",
-                text: "👋 哈囉！這是自動發送的訊息！"
+            // 發送訊息到聊天視窗
+            function sendMessage() {
+                if (liff.isApiAvailable('shareTargetPicker')) {
+                    liff.shareTargetPicker([
+                        {
+                            type: 'text',
+                            text: '您好！我掃描了QR Code並訪問了您的網頁。'
+                        }
+                    ])
+                    .then(result => {
+                        if (result) {
+                            document.getElementById('message').textContent = '訊息已發送！';
+                        } else {
+                            document.getElementById('message').textContent = '訊息發送取消';
+                        }
+                        // 顯示手動發送按鈕
+                        document.getElementById('sendMessageBtn').style.display = 'inline-block';
+                    })
+                    .catch(error => {
+                        document.getElementById('message').textContent = '發送訊息時發生錯誤';
+                        console.error('發送訊息錯誤', error);
+                    });
+                } else {
+                    // 如果不支援shareTargetPicker，可以使用其他方法
+                    // 例如使用LINE Messaging API
+                    document.getElementById('message').textContent = '您的LINE版本不支援此功能';
+                }
             }
-            ]);
-            alert("訊息已成功發送！");
-            liff.closeWindow();  // 成功後關掉
-        } catch (err) {
-            console.error('發送失敗', err);
 
-            if (err.message && err.message.includes('user doesn\'t grant required permissions')) {
-            // 🛑 如果真的沒授權，要重新登入一次
-            alert('您尚未授權發送訊息，請同意授權！');
-            liff.logout();
-            liff.login({
-                scope: ['profile', 'chat_message.write'],
-                redirectUri: window.location.href
-            });
-            } else {
-            alert("發生其他錯誤，請重新嘗試！");
-            }
-        }
-        }
-  </script>
+            // 手動發送按鈕點擊事件
+            document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
+        });
+    </script>
 </body>
 </html>
