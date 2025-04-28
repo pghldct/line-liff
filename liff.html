@@ -42,8 +42,7 @@
             }).then(() => {
                 // 檢查登入狀態
                 if (!liff.isLoggedIn()) {
-                    liff.login({
-                        redirectUri: window.location.href, // 登入後重定向回當前頁面
+                    liff.login({// 登入後重定向回當前頁面
                         scope: "chat_message.write,openid,profile"
                         });
                 } else {
