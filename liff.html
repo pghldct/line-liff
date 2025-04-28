@@ -10,28 +10,34 @@
 
   <script>
     async function main() {
-      await liff.init({ liffId: "2007338941-D63gmVoP" }); // 這裡換成你的 LIFF ID
+        await liff.init({ liffId: "2007338941-D63gmVoP" }); // 這裡換成你的 LIFF ID
 
-      if (!liff.isLoggedIn()) {
+        if (!liff.isLoggedIn()) {
+            liff.login({
+                scope: ['chat_message.write'],
+            });
+            return;
+        }
+        const scopes = await liff.getGrantedScopes();
+        if (!scopes.includes('chat_message.write')) {
         liff.login({
             scope: ['chat_message.write'],
         });
         return;
         }
-
-      try {
-        await liff.sendMessages([
-          {
-            type: "text",
-            text: "👋 你好！我從 LIFF 頁面來的！"
-          }
+        try {
+            await liff.sendMessages([
+            {
+                type: "text",
+                text: "👋 你好！我從 LIFF 頁面來的！"
+            }
         ]);
-        alert("訊息已發送！");
-        liff.closeWindow();
-      } catch (err) {
-        console.error('發送失敗', err);
-        alert("發送訊息失敗！");
-      }
+            alert("訊息已發送！");
+            liff.closeWindow();
+        } catch (err) {
+            console.error('發送失敗', err);
+            alert("發送訊息失敗！");
+        }
     }
 
     main();
