@@ -12,39 +12,45 @@
   <script>
     // 初始化LIFF
     async function main() {
-      try {
-        // 用你提供的 LIFF ID 進行初始化
-        await liff.init({ liffId: "2007338941-D63gmVoP" });
+    try {
+        console.log('初始化 LIFF...');
+        await liff.init({ liffId: "2007338941-D63gmVoP" });  // 用你的 LIFF ID
+        
         console.log('LIFF 初始化成功！');
         
-        // 確認網頁是否在 LINE 客戶端開啟
+        // 確認是否在 LINE 客戶端中開啟
         if (!liff.isInClient()) {
-          alert('請在 LINE 內打開這個網頁！');
-          return;
+        console.log('此頁面未在 LINE 客戶端中開啟。');
+        alert('請在 LINE 內打開這個網頁！');
+        return;
         }
-
-        // 從 URL 參數中取得訊息
+        
+        // 讀取 URL 中的訊息參數
         const params = new URL(location.href).searchParams;
         const message = params.get('message') || '這是預設訊息';
+        
+        // 確認訊息是否正確
+        console.log('訊息內容:', message);
 
         // 發送訊息
         await liff.sendMessages([
-          {
+        {
             type: 'text',
             text: decodeURIComponent(message)  // 解碼訊息
-          }
+        }
         ]);
         console.log('訊息發送成功！');
-
-        // 發送完訊息後，關閉視窗
+        
+        // 發送完成後關閉 LIFF 視窗
         liff.closeWindow();
-      } catch (error) {
-        console.error('LIFF 初始化失敗：', error);
+        
+    } catch (error) {
+        console.error('錯誤發生：', error);  // 顯示錯誤訊息
         alert('發生錯誤，請稍後再試！');
-      }
+    }
     }
 
-    // 執行初始化和發送訊息的函數
+    // 執行初始化並發送訊息
     main();
   </script>
 </body>
