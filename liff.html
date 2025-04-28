@@ -2,35 +2,45 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>自動發送訊息</title>
+  <title>LIFF自動發訊息</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
-  <h1>訊息發送中...</h1>
+  <h1>正在處理中...</h1>
 
   <script>
     async function main() {
-        await liff.init({ liffId: "2007338941-D63gmVoP" }); // 這裡換成你的 LIFF ID
+      await liff.init({ liffId: "你的LIFF_ID" });
 
-        if (!liff.isLoggedIn()) {
-            liff.login({
-                scope: ['profile', 'chat_message.write'],
-            });
-            return;
-        }
-        try {
-            await liff.sendMessages([
-            {
-                type: "text",
-                text: "👋 你好！我從 LIFF 頁面來的！"
-            }
+      if (!liff.isLoggedIn()) {
+        liff.login({
+          scope: ['profile', 'chat_message.write'],  // 要求必要權限
+        });
+        return;
+      }
+
+      try {
+        await liff.sendMessages([
+          {
+            type: "text",
+            text: "👋 哈囉！這是自動發送的訊息！"
+          }
         ]);
-            alert("訊息已發送！");
-            liff.closeWindow();
-        } catch (err) {
-            console.error('發送失敗', err);
-            alert("發送訊息失敗！");
+        alert("訊息已成功發送！");
+        liff.closeWindow();  // 成功後關閉 LIFF 視窗
+      } catch (err) {
+        console.error('發送失敗', err);
+
+        if (err.message && err.message.includes('access token revoked')) {
+          alert('登入過期了，重新登入！');
+          liff.logout();
+          liff.login({
+            scope: ['profile', 'chat_message.write'],
+          });
+        } else {
+          alert("發送失敗，請重新嘗試！");
         }
+      }
     }
 
     main();
