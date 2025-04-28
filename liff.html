@@ -2,33 +2,49 @@
 <html lang="zh-TW">
 <head>
   <meta charset="UTF-8">
-  <title>快速註冊</title>
+  <title>LIFF 註冊範例</title>
   <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
-  <h1>正在發送訊息...</h1>
+  <h1>正在處理您的註冊訊息...</h1>
+  <p>如果您未在 LINE App 裡看到這個訊息，請打開 LINE 內部的頁面。</p>
 
   <script>
+    // 初始化LIFF
     async function main() {
-      await liff.init({ liffId: "2007338941-D63gmVoP" });
-
-      const params = new URL(location.href).searchParams;
-      const message = params.get('message') || '預設訊息';
-
-      if (!liff.isInClient()) {
-        alert('請在LINE內打開喔！');
-        return;
-      }
-
-      await liff.sendMessages([
-        {
-          type: 'text',
-          text: decodeURIComponent(message)
+      try {
+        // 用你提供的 LIFF ID 進行初始化
+        await liff.init({ liffId: "2007338941-D63gmVoP" });
+        console.log('LIFF 初始化成功！');
+        
+        // 確認網頁是否在 LINE 客戶端開啟
+        if (!liff.isInClient()) {
+          alert('請在 LINE 內打開這個網頁！');
+          return;
         }
-      ]);
 
-      liff.closeWindow();
+        // 從 URL 參數中取得訊息
+        const params = new URL(location.href).searchParams;
+        const message = params.get('message') || '這是預設訊息';
+
+        // 發送訊息
+        await liff.sendMessages([
+          {
+            type: 'text',
+            text: decodeURIComponent(message)  // 解碼訊息
+          }
+        ]);
+        console.log('訊息發送成功！');
+
+        // 發送完訊息後，關閉視窗
+        liff.closeWindow();
+      } catch (error) {
+        console.error('LIFF 初始化失敗：', error);
+        alert('發生錯誤，請稍後再試！');
+      }
     }
+
+    // 執行初始化和發送訊息的函數
     main();
   </script>
 </body>
