@@ -3,54 +3,67 @@
 <head>
   <meta charset="UTF-8">
   <title>LIFF 註冊範例</title>
-  
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 </head>
 <body>
-  <h1>正在處理您的註冊訊息...</h1>
-  <p>如果您未在 LINE App 裡看到這個訊息，請打開 LINE 內部的頁面。</p>
-  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+  <h1>即將發送訊息</h1>
+  <p id="messageContent">載入中...</p>  <!-- 顯示訊息內容 -->
+  <button id="sendButton" style="display:none;">發送訊息</button>  <!-- 發送訊息按鈕 -->
+
   <script>
-    // 初始化LIFF
     async function main() {
-    try {
+      try {
+        // 初始化 LIFF
         console.log('初始化 LIFF...');
         await liff.init({ liffId: "2007338941-D63gmVoP" });  // 用你的 LIFF ID
-        
         console.log('LIFF 初始化成功！');
         
         // 確認是否在 LINE 客戶端中開啟
-        if (!liff.isInClient()) {
-        console.log('此頁面未在 LINE 客戶端中開啟。');
-        alert('請在 LINE 內打開這個網頁！');
-        return;
-        }
+        // if (!liff.isInClient()) {
+        //   console.log('此頁面未在 LINE 客戶端中開啟。');
+        //   alert('請在 LINE 內打開這個網頁！');
+        //   return;
+        // }
         
         // 讀取 URL 中的訊息參數
         const params = new URL(location.href).searchParams;
         const message = params.get('message') || '這是預設訊息';
-        
-        // 確認訊息是否正確
-        console.log('訊息內容:', message);
 
-        // 發送訊息
-        await liff.sendMessages([
-        {
-            type: 'text',
-            text: decodeURIComponent(message)  // 解碼訊息
-        }
-        ]);
-        console.log('訊息發送成功！');
+        // 顯示訊息內容
+        const messageContentElement = document.getElementById('messageContent');
+        messageContentElement.textContent = `訊息內容: ${decodeURIComponent(message)}`;
+
+        // 顯示發送按鈕
+        const sendButton = document.getElementById('sendButton');
+        sendButton.style.display = 'inline-block';
+
+        // 點擊按鈕後發送訊息
+        sendButton.addEventListener('click', async () => {
+          try {
+            console.log('發送訊息...');
+            await liff.sendMessages([
+              {
+                type: 'text',
+                text: decodeURIComponent(message)  // 發送訊息
+              }
+            ]);
+            console.log('訊息發送成功！');
+            
+            // 發送後關閉視窗
+            liff.closeWindow();
+          } catch (error) {
+            console.error('發送訊息失敗：', error);
+            alert('發送訊息時發生錯誤，請稍後再試！');
+          }
+        });
         
-        // 發送完成後關閉 LIFF 視窗
-        liff.closeWindow();
-        
-    } catch (error) {
-        console.error('錯誤發生：', error);  // 顯示錯誤訊息
-        alert('發生錯誤，請稍後再試！');
-    }
+      } catch (error) {
+        console.error('LIFF 初始化失敗：', error);
+        alert('初始化 LIFF 時發生錯誤，請稍後再試！');
+      }
     }
 
-    // 執行初始化並發送訊息
+    // 開始執行
     main();
   </script>
 </body>
