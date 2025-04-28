@@ -14,16 +14,9 @@
 
         if (!liff.isLoggedIn()) {
             liff.login({
-                scope: ['chat_message.write'],
+                scope: ['profile', 'chat_message.write'],
             });
             return;
-        }
-        const scopes = await liff.getGrantedScopes();
-        if (!scopes.includes('chat_message.write')) {
-        liff.login({
-            scope: ['chat_message.write'],
-        });
-        return;
         }
         try {
             await liff.sendMessages([
