@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <title>快速註冊</title>
+  <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+</head>
+<body>
+  <h1>正在發送訊息...</h1>
+
+  <script>
+    async function main() {
+      await liff.init({ liffId: "你的LIFF_ID" });
+
+      const params = new URL(location.href).searchParams;
+      const message = params.get('message') || '預設訊息';
+
+      if (!liff.isInClient()) {
+        alert('請在LINE內打開喔！');
+        return;
+      }
+
+      await liff.sendMessages([
+        {
+          type: 'text',
+          text: decodeURIComponent(message)
+        }
+      ]);
+
+      liff.closeWindow();
+    }
+    main();
+  </script>
+</body>
+</html>
