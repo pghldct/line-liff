@@ -36,51 +36,57 @@
             // 初始化LIFF
             // 請將YOUR_LIFF_ID替換為您的LIFF ID
             liff.init({
-                liffId: "2007338941-D63gmVoP"
+                liffId: "2007338941-D63gmVoP",
+                withLoginOnExternalBrowser: true,
+                scope: ["chat_message.write", "openid", "profile"]  // 允許在外部瀏覽器中登入
             }).then(() => {
-                // 檢查是否在LINE環境內
-                if (liff.isLoggedIn()) {
-                    document.getElementById('message').textContent = '已連接到LINE，正在發送訊息...';
-                    // 自動發送訊息
-                    sendMessage();
-                } else {
-                    document.getElementById('message').textContent = '請先登入LINE';
+                // 檢查登入狀態
+                if (!liff.isLoggedIn()) {
                     liff.login();
+                } else {
+                    // 已登入後的操作
+                    document.getElementById('message').textContent = '已連接到LINE，正在發送訊息...';
+                    sendMessage();
                 }
             }).catch(err => {
-                document.getElementById('message').textContent = '發生錯誤: ' + err.message;
                 console.error('LIFF初始化失敗', err);
             });
 
             // 發送訊息到聊天視窗
             function sendMessage() {
-                if (liff.isApiAvailable('shareTargetPicker')) {
-                    liff.shareTargetPicker([
-                        {
-                            type: 'text',
-                            text: '您好！我掃描了QR Code並訪問了您的網頁。'
-                        }
-                    ])
+                // 檢查是否在LINE應用內
+                if (liff.isInClient()) {
+                    // 使用sendMessages在LINE應用內發送訊息
+                    liff.sendMessages([{
+                        type: 'text',
+                        text: '您好！我掃描了QR Code並訪問了您的網頁。'
+                    }])
+                    .then(() => {
+                        document.getElementById('message').textContent = '訊息已發送！';
+                    })
+                    .catch((error) => {
+                        document.getElementById('message').textContent = '發送訊息時發生錯誤';
+                        console.error('發送訊息錯誤', error);
+                    });
+                } else {
+                    // 如果在外部瀏覽器，則使用shareTargetPicker
+                    liff.shareTargetPicker([{
+                        type: 'text',
+                        text: '您好！我掃描了QR Code並訪問了您的網頁。'
+                    }])
                     .then(result => {
                         if (result) {
                             document.getElementById('message').textContent = '訊息已發送！';
                         } else {
                             document.getElementById('message').textContent = '訊息發送取消';
                         }
-                        // 顯示手動發送按鈕
-                        document.getElementById('sendMessageBtn').style.display = 'inline-block';
                     })
                     .catch(error => {
                         document.getElementById('message').textContent = '發送訊息時發生錯誤';
                         console.error('發送訊息錯誤', error);
                     });
-                } else {
-                    // 如果不支援shareTargetPicker，可以使用其他方法
-                    // 例如使用LINE Messaging API
-                    document.getElementById('message').textContent = '您的LINE版本不支援此功能';
                 }
             }
-
             // 手動發送按鈕點擊事件
             document.getElementById('sendMessageBtn').addEventListener('click', sendMessage);
         });
