@@ -42,7 +42,10 @@
             }).then(() => {
                 // 檢查登入狀態
                 if (!liff.isLoggedIn()) {
-                    liff.login();
+                    liff.login({
+                        redirectUri: window.location.href, // 登入後重定向回當前頁面
+                        scope: "chat_message.write,openid,profile"
+                        });
                 } else {
                     // 已登入後的操作
                     document.getElementById('message').textContent = '已連接到LINE，正在發送訊息...';
