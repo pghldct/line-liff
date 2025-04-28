@@ -10,40 +10,42 @@
 
   <script>
     async function main() {
-      await liff.init({ liffId: "2007338941-D63gmVoP" });
+        await liff.init({ liffId: "你的LIFF_ID" });
 
-      if (!liff.isLoggedIn()) {
-        liff.login({
-          scope: ['profile', 'chat_message.write'],  // 要求必要權限
-        });
-        return;
-      }
-
-      try {
-        await liff.sendMessages([
-          {
-            type: "text",
-            text: "👋 哈囉！這是自動發送的訊息！"
-          }
-        ]);
-        alert("訊息已成功發送！");
-        liff.closeWindow();  // 成功後關閉 LIFF 視窗
-      } catch (err) {
-        console.error('發送失敗', err);
-
-        if (err.message && err.message.includes('access token revoked')) {
-          alert('登入過期了，重新登入！');
-          liff.logout();
-          liff.login({
-            scope: ['profile', 'chat_message.write'],
-          });
-        } else {
-          alert("發送失敗，請重新嘗試！");
+        // ⭐ 如果還沒登入，就登入，並且強制要求 scope
+        if (!liff.isLoggedIn()) {
+            liff.login({
+            scope: ['profile', 'chat_message.write'],   // 💬 特別注意：這裡一定要帶
+            redirectUri: window.location.href           // ⭐ 讓它回來這一頁，繼續動作
+            });
+            return;  // login 之後頁面會重新整理，所以這裡 return
         }
-      }
-    }
 
-    main();
+        try {
+            await liff.sendMessages([
+            {
+                type: "text",
+                text: "👋 哈囉！這是自動發送的訊息！"
+            }
+            ]);
+            alert("訊息已成功發送！");
+            liff.closeWindow();  // 成功後關掉
+        } catch (err) {
+            console.error('發送失敗', err);
+
+            if (err.message && err.message.includes('user doesn\'t grant required permissions')) {
+            // 🛑 如果真的沒授權，要重新登入一次
+            alert('您尚未授權發送訊息，請同意授權！');
+            liff.logout();
+            liff.login({
+                scope: ['profile', 'chat_message.write'],
+                redirectUri: window.location.href
+            });
+            } else {
+            alert("發生其他錯誤，請重新嘗試！");
+            }
+        }
+        }
   </script>
 </body>
 </html>
